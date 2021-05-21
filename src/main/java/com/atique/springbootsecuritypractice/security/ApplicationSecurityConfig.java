@@ -11,7 +11,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import java.util.concurrent.TimeUnit;
 
 import static com.atique.springbootsecuritypractice.enums.ApplicationUserRole.*;
 
@@ -35,14 +37,28 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
                 .antMatchers("/api/**").hasRole(STUDENT.name())
-//                .antMatchers(HttpMethod.DELETE, "/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
-//                .antMatchers(HttpMethod.POST, "/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
-//                .antMatchers(HttpMethod.PUT, "/management/api/**").hasAuthority(STUDENT_WRITE.getPermission())
-//                .antMatchers(HttpMethod.GET, "/management/api/**").hasAnyRole(ADMIN.name(), ADMIN_TRAINEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
-                .httpBasic();
+                .formLogin()
+                .loginPage("/login")
+                    .permitAll()
+                    .defaultSuccessUrl("/courses", true)
+                    .passwordParameter("password") //this is default. if need to change, adopt it here and log in page
+                    .usernameParameter("username") //this is default. if need to change, adopt it here and log in page
+                .and()
+                .rememberMe()
+                    .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(30))
+                    .key("secret-key-to-encrypt-token")
+                    .rememberMeParameter("remember-me") //this is default. if need to change, adopt it here and log in page
+                .and()
+                .logout()
+                    .logoutUrl("/logout")
+                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET")) // https://docs.spring.io/spring-security/site/docs/4.2.12.RELEASE/apidocs/org/springframework/security/config/annotation/web/configurers/LogoutConfigurer.html
+                    .clearAuthentication(true)
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "remember-me")
+                    .logoutSuccessUrl("/login");
     }
 
     @Override
@@ -51,21 +67,18 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         UserDetails user_01 = User.builder()
                 .username("student")
                 .password(passwordConfig.passwordEncoder().encode("password"))
-//                .roles(STUDENT.name())
                 .authorities(STUDENT.getGrantedAuthorities())
                 .build();
 
         UserDetails user_02 = User.builder()
                 .username("admin")
                 .password(passwordConfig.passwordEncoder().encode("password"))
-//                .roles(ADMIN.name())
                 .authorities(ADMIN.getGrantedAuthorities())
                 .build();
 
         UserDetails user_03 = User.builder()
                 .username("adminTrainee")
                 .password(passwordConfig.passwordEncoder().encode("password"))
-//                .roles(ADMIN_TRAINEE.name())
                 .authorities(ADMIN_TRAINEE.getGrantedAuthorities())
                 .build();
 
