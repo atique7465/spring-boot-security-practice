@@ -1,4 +1,7 @@
 # spring-boot-security-practice
+
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/iluwatar/java-design-patterns/master/LICENSE.md)
+
 Spring Boot Security
 - Users Roles and Authorities
 - Permission Based Authentication
@@ -13,4 +16,3 @@ Spring Boot Security
 **_<p align="justify">"Recently I have completed a course on Spring Security. In this repository i practiced the codes by following the instructor throughout the course."<p/>_**
 Course Link: https://amigoscode.com/courses <br>
 Course Name: Spring Security
-
